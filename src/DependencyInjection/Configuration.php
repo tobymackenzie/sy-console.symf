@@ -28,11 +28,11 @@ class Configuration implements ConfigurationInterface{
 				->end()
 			->end()
 			->arrayNode('parameters')
-				->prototype('scalar')->end()
+				->prototype('variable')->end()
 			->end()
 			->arrayNode('services')
 				->prototype('array')
-					->prototype('scalar')->end()
+					->prototype('variable')->end()
 				->end()
 			->end()
 		->end();
