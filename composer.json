@@ -1,5 +1,6 @@
 {
 	"name": "tjm/sy-console"
+	,"description": "Symfony Console component with dependency injection, config handling, and other niceties."
 	,"authors": [
 		{
 			"name": "Toby Mackenzie"
@@ -7,6 +8,7 @@
 			,"homepage": "http://www.tobymackenzie.com"
 		}
 	]
+	,"license": "BSD-3-Clause"
 	,"require" : {
 		"php": ">=5.3.3"
 		,"symfony/config": "2.4.*"
