@@ -4,14 +4,19 @@ namespace TJM\Component\Console;
 use ReflectionClass;
 use Symfony\Component\Console\Application as Base;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
+use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 use TJM\Component\Console\DependencyInjection\Configuration;
-use TJM\Component\Console\DependencyInjection\ContainerBuilder;
-
-// use Symfony\Component\Config\FileLocator;
+use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 
 class Application extends Base implements ContainerAwareInterface{
 	public function __construct($config = null){
@@ -91,12 +96,14 @@ class Application extends Base implements ContainerAwareInterface{
 	/*=====
 	==Config
 	=====*/
+	//-! propably no longer needed becuase of loading through DI
 	/*
 	Property: config
 	Current state of configuration.
 	*/
 	protected $config = Array();
 
+	//-! propably no longer needed becuase of loading through DI
 	/*
 	Property: configSettings
 	Settings of config for validating config keys / values.
@@ -109,6 +116,7 @@ class Application extends Base implements ContainerAwareInterface{
 		return $this->configSettings;
 	}
 
+	//-! propably no longer needed becuase of loading through DI
 	/*
 	Property: configProcessor
 	Processor for checking configuration.
@@ -129,11 +137,13 @@ class Application extends Base implements ContainerAwareInterface{
 	*/
 	public function loadConfig($mapOrPath){
 		if(is_string($mapOrPath)){
-			$config = $this->loadConfigFiles($mapOrPath);
+			$this->loadConfigFiles($mapOrPath);
+		//-! propably no longer needed becuase of loading through DI
+		//-! probably no longer works
 		}else{
 			$config = $this->processConfigData(Array($mapOrPath));
+			$this->setConfig($config);
 		}
-		$this->setConfig($config);
 	}
 
 	/*
@@ -143,22 +153,39 @@ class Application extends Base implements ContainerAwareInterface{
 		paths(Array|String): path to a file or array of paths to mulitple files that will be loaded as configuration.
 	*/
 	public function loadConfigFiles($paths){
-		if(is_string($paths)){
+		if(is_string($paths) || is_callable($paths)){
 			$paths = Array($paths);
 		}
-		$configData = Array();
 		foreach($paths as $path){
-			// $locater = new FileLocator(Array(__DIR__ . DIRECTORY_SEPARATOR . '_config'));
-			// $loaderResolver = new LoaderResolver(Array());
-			// $delegatingLoader = new DelegatingLoader($loaderResolver);
-			// $configFiles = $locater->locate('config.yml');
-			if(is_string($path) && pathinfo($path, PATHINFO_EXTENSION) === 'yml'){
-				$configData[] = Yaml::parse($path);
+			if(is_callable($path)){
+				$loader = new ClosureLoader($this->getContainer());
+				$loader->load($path);
+			}else{
+				$locater = new FileLocator(Array(pathinfo($path, PATHINFO_DIRNAME)));
+				switch(pathinfo($path, PATHINFO_EXTENSION)){
+					case 'ini':
+						$loader = new IniFileLoader($this->getContainer(), $locater);
+					break;
+					case 'php':
+						$loader = new PhpFileLoader($this->getContainer(), $locater);
+					break;
+					case 'xml':
+						$loader = new XmlFileLoader($this->getContainer(), $locater);
+					break;
+					case 'yml':
+						$loader = new YamlFileLoader($this->getContainer(), $locater);
+					break;
+				}
+				$loader->load(pathinfo($path, PATHINFO_BASENAME));
 			}
 		}
-		return $this->processConfigData($configData);
+
+		$this->processConfig();
+
+		return $this;
 	}
 
+	//-! propably no longer needed becuase of loading through DI
 	/*
 	Method: processConfigData
 	Process an array of config data to make sure it properly matches configuration.
@@ -171,6 +198,8 @@ class Application extends Base implements ContainerAwareInterface{
 		return $processedConfig;
 	}
 
+	//-! propably no longer needed becuase of loading through DI
+	//-! probably no longer works
 	/*
 	Method: setConfig
 	Set configuration from an array.  Merges with existing settings unless 'replace' is true.  Make sure config has been processed with {processConfigData()} before passing into this method.
@@ -184,43 +213,51 @@ class Application extends Base implements ContainerAwareInterface{
 		}else{
 			$this->config = array_merge($this->config, $config);
 		}
-		if(isset($config['parameters'])){
-			$parameters = $config['parameters'];
-			$container = $this->getContainer();
-			foreach($parameters as $parameter=> $value){
-				$container->setParameter($parameter, $value);
-			}
+		$consoleConfig = $config;
+		if(isset($consoleConfig['name'])){
+			$this->getContainer()->setParameter('tjm_console.name', $consoleConfig['name']);
 		}
-		if(isset($config['services'])){
-			$services = $config['services'];
-			$container = $this->getContainer();
-			foreach($services as $id=> $service){
-				$container->setServiceForConfig($id, $service);
-			}
+		if(isset($consoleConfig['version'])){
+			$this->getContainer()->setParameter('tjm_console.version', $consoleConfig['version']);
 		}
-		if(isset($config['tjm_console'])){
-			$consoleConfig = $config['tjm_console'];
-			if(isset($consoleConfig['name'])){
-				$this->name = $consoleConfig['name'];
-			}
-			if(isset($consoleConfig['version'])){
-				$this->version = $consoleConfig['version'];
-			}
-			if(isset($consoleConfig['rootNamespace']) && !isset($this->rootNamespace)){
-				$this->rootNamespace = $consoleConfig['rootNamespace'];
-			}
-			if(isset($consoleConfig['commands']) && is_array($consoleConfig['commands'])){
-				foreach($consoleConfig['commands'] as $key=> $value){
-					if(is_numeric($key)){
-						$this->addCommandForClassname($value);
-					}else{
-						$this->addCommandsAtPath($value, $key);
-					}
+		if(isset($consoleConfig['rootNamespace']) && !isset($this->rootNamespace)){
+			$this->getContainer()->setParameter('tjm_console.rootNamespace', $consoleConfig['rootNamespace']);
+		}
+		if(isset($consoleConfig['commands']) && is_array($consoleConfig['commands'])){
+			$this->getContainer()->setParameter('tjm_console.commands', $consoleConfig['commands']);
+		}
+
+		$this->processConfig();
+
+		return $this;
+	}
+
+	/*
+	Method: processConfig
+	Process configuration as set in container parameters.
+	*/
+	public function processConfig(){
+		$container = $this->getContainer();
+		$container->compile();
+
+		if($container->hasParameter('tjm_console.name')){
+			$this->name = $container->getParameter('tjm_console.name');
+		}
+		if($container->hasParameter('tjm_console.version')){
+			$this->version = $container->getParameter('tjm_console.version');
+		}
+		if($container->hasParameter('tjm_console.rootNamespace')){
+			$this->rootNamespace = $container->getParameter('tjm_console.rootNamespace');
+		}
+		if($container->hasParameter('tjm_console.commands')){
+			foreach($container->getParameter('tjm_console.commands') as $key=> $value){
+				if(is_numeric($key)){
+					$this->addCommandForClassname($value);
+				}else{
+					$this->addCommandsAtPath($value, $key);
 				}
 			}
 		}
-
-		return $this;
 	}
 
 	/*=====
@@ -234,6 +271,7 @@ class Application extends Base implements ContainerAwareInterface{
 	public function getContainer(){
 		if(!isset($this->container)){
 			$this->container = new ContainerBuilder();
+			$this->container->registerExtension(new ConsoleExtension());
 		}
 		return $this->container;
 	}
