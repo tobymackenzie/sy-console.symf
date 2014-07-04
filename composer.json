@@ -1,6 +1,6 @@
 {
 	"name": "tjm/sy-console"
-	,"description": "Symfony Console component with dependency injection, config handling, and other niceties."
+	,"description": "Symfony Console component with dependency injection, config handling, configurable command loading, and other niceties."
 	,"authors": [
 		{
 			"name": "Toby Mackenzie"
