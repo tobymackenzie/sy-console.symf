@@ -2,9 +2,12 @@
 namespace TJM\Component\Console;
 
 use ReflectionClass;
+use ReflectionObject;
 use Symfony\Component\Console\Application as Base;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -116,6 +119,58 @@ class Application extends Base implements ContainerAwareInterface{
 		return $this->configSettings;
 	}
 
+	/*
+	Property: configLoaders
+	Loaders for loading config files, keyed by the path to load from
+	*/
+	protected $configLoaders;
+	public function getConfigLoader($path){
+		if(!is_dir($path)){
+			$path = dirname($path);
+		}
+		if(!isset($this->configLoaders[$path])){
+			$this->createConfigLoader($path);
+		}
+		return $this->configLoaders[$path];
+	}
+
+	/*
+	Method: createConfigLoader
+	Create a config loader for one or more paths.  Since $this->configLoaders is keyed on path, will use the same object for all path keys.
+	*/
+	public function createConfigLoader($paths){
+		if(is_string($paths)){
+			$paths = Array($paths);
+		}
+		$loader = null;
+		foreach($paths as $path){
+			if(!$loader){
+				if(!is_dir($path)){
+					$path = dirname($path);
+				}
+				if(isset($this->configLoaders[$path])){
+					$loader = $this->configLoaders[$path];
+				}else{
+					$container = $this->getContainer();
+					$locator = new FileLocator($path);
+					$resolver = new LoaderResolver(array(
+						new YamlFileLoader($container, $locator),
+						new PhpFileLoader($container, $locator),
+						new XmlFileLoader($container, $locator),
+						new IniFileLoader($container, $locator),
+						new ClosureLoader($container)
+					));
+
+					$loader = new DelegatingLoader($resolver);
+				}
+			}
+			if(!isset($this->configLoaders[$path])){
+				$this->configLoaders[$path] = $loader;
+			}
+		}
+		return $this;
+	}
+
 	//-! propably no longer needed becuase of loading through DI
 	/*
 	Property: configProcessor
@@ -161,21 +216,7 @@ class Application extends Base implements ContainerAwareInterface{
 				$loader = new ClosureLoader($this->getContainer());
 				$loader->load($path);
 			}else{
-				$locater = new FileLocator(Array(pathinfo($path, PATHINFO_DIRNAME)));
-				switch(pathinfo($path, PATHINFO_EXTENSION)){
-					case 'ini':
-						$loader = new IniFileLoader($this->getContainer(), $locater);
-					break;
-					case 'php':
-						$loader = new PhpFileLoader($this->getContainer(), $locater);
-					break;
-					case 'xml':
-						$loader = new XmlFileLoader($this->getContainer(), $locater);
-					break;
-					case 'yml':
-						$loader = new YamlFileLoader($this->getContainer(), $locater);
-					break;
-				}
+				$loader = $this->getConfigLoader($path);
 				$loader->load(pathinfo($path, PATHINFO_BASENAME));
 			}
 		}
