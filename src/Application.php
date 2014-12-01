@@ -5,21 +5,13 @@ use ReflectionClass;
 use ReflectionObject;
 use Symfony\Component\Console\Application as Base;
 use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Loader\DelegatingLoader;
-use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
-use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
-use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
 use TJM\Component\Console\DependencyInjection\Configuration;
 use TJM\Component\Console\DependencyInjection\ConsoleExtension;
+use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
 	public function __construct($config = null){
@@ -120,55 +112,15 @@ class Application extends Base implements ContainerAwareInterface{
 	}
 
 	/*
-	Property: configLoaders
-	Loaders for loading config files, keyed by the path to load from
+	Property: configLoader
+	Loader for loading config files
 	*/
-	protected $configLoaders;
+	protected $configLoader;
 	public function getConfigLoader($path){
-		if(!is_dir($path)){
-			$path = dirname($path);
+		if(!isset($this->configLoader)){
+			$this->configLoader = new MultiPathLoader($this->getContainer());
 		}
-		if(!isset($this->configLoaders[$path])){
-			$this->createConfigLoader($path);
-		}
-		return $this->configLoaders[$path];
-	}
-
-	/*
-	Method: createConfigLoader
-	Create a config loader for one or more paths.  Since $this->configLoaders is keyed on path, will use the same object for all path keys.
-	*/
-	public function createConfigLoader($paths){
-		if(is_string($paths)){
-			$paths = Array($paths);
-		}
-		$loader = null;
-		foreach($paths as $path){
-			if(!$loader){
-				if(!is_dir($path)){
-					$path = dirname($path);
-				}
-				if(isset($this->configLoaders[$path])){
-					$loader = $this->configLoaders[$path];
-				}else{
-					$container = $this->getContainer();
-					$locator = new FileLocator($path);
-					$resolver = new LoaderResolver(array(
-						new YamlFileLoader($container, $locator),
-						new PhpFileLoader($container, $locator),
-						new XmlFileLoader($container, $locator),
-						new IniFileLoader($container, $locator),
-						new ClosureLoader($container)
-					));
-
-					$loader = new DelegatingLoader($resolver);
-				}
-			}
-			if(!isset($this->configLoaders[$path])){
-				$this->configLoaders[$path] = $loader;
-			}
-		}
-		return $this;
+		return $this->configLoader;
 	}
 
 	//-! propably no longer needed becuase of loading through DI
@@ -212,13 +164,8 @@ class Application extends Base implements ContainerAwareInterface{
 			$paths = Array($paths);
 		}
 		foreach($paths as $path){
-			if(is_callable($path)){
-				$loader = new ClosureLoader($this->getContainer());
-				$loader->load($path);
-			}else{
-				$loader = $this->getConfigLoader($path);
-				$loader->load(pathinfo($path, PATHINFO_BASENAME));
-			}
+			$loader = $this->getConfigLoader($path);
+			$loader->load($path);
 		}
 
 		$this->processConfig();
