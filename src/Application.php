@@ -79,7 +79,9 @@ class Application extends Base implements ContainerAwareInterface{
 
 			//--if in root namespace, alias without that namespace
 			if($this->getRootNamespace() && preg_match("/^{$this->getRootNamespace()}:(.*)$/", $instance->getName(), $matches)){
-				$instance->setAliases(Array($matches[1]));
+				$aliases = $instance->getAliases() ?: Array();
+				$aliases[] = $matches[1];
+				$instance->setAliases($aliases);
 			}
 			$this->add($instance);
 		}
