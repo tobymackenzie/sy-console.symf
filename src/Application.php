@@ -231,10 +231,10 @@ class Application extends Base implements ContainerAwareInterface{
 		$container->compile();
 
 		if($container->hasParameter('tjm_console.name')){
-			$this->name = $container->getParameter('tjm_console.name');
+			$this->setName($container->getParameter('tjm_console.name'));
 		}
 		if($container->hasParameter('tjm_console.version')){
-			$this->version = $container->getParameter('tjm_console.version');
+			$this->setVersion($container->getParameter('tjm_console.version'));
 		}
 		if($container->hasParameter('tjm_console.rootNamespace')){
 			$this->rootNamespace = $container->getParameter('tjm_console.rootNamespace');
