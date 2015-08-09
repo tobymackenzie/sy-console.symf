@@ -10,12 +10,13 @@
 	]
 	,"license": "BSD-3-Clause"
 	,"minimum-stability": "dev"
+	,"prefer-stable": true
 	,"require" : {
 		"php": ">=5.3.3"
-		,"symfony/config": "2.4.*"
-		,"symfony/console": "2.4.*"
-		,"symfony/dependency-injection": "2.4.*"
-		,"symfony/finder": "2.4.*"
+		,"symfony/config": "~2.4"
+		,"symfony/console": "~2.4"
+		,"symfony/dependency-injection": "~2.4"
+		,"symfony/finder": "~2.4"
 		,"tjm/sy-dependency-injection": "master"
 	}
 	,"autoload" : {
