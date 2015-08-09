@@ -120,25 +120,7 @@ class Application extends Base implements ContainerAwareInterface{
 	/*=====
 	==Config
 	=====*/
-	//-! propably no longer needed becuase of loading through DI
-	/*
-	Property: config
-	Current state of configuration.
-	*/
-	protected $config = Array();
 
-	//-! propably no longer needed becuase of loading through DI
-	/*
-	Property: configSettings
-	Settings of config for validating config keys / values.
-	*/
-	protected $configSettings;
-	public function getConfigSettings(){
-		if(!isset($this->configSettings)){
-			$this->configSettings = new Configuration();
-		}
-		return $this->configSettings;
-	}
 
 	/*
 	Property: configLoader
@@ -152,34 +134,15 @@ class Application extends Base implements ContainerAwareInterface{
 		return $this->configLoader;
 	}
 
-	//-! propably no longer needed becuase of loading through DI
-	/*
-	Property: configProcessor
-	Processor for checking configuration.
-	*/
-	protected $configProcessor;
-	public function getConfigProcessor(){
-		if(!isset($this->configProcessor)){
-			$this->configProcessor = new Processor();
-		}
-		return $this->configProcessor;
-	}
 
 	/*
 	Method: loadConfig
-	Load configuration, either from an array, or from files.
+	Load configuration from files.
 	Arguments:
-		mapOrPath(Array|String):
+		paths(Array|String):
 	*/
-	public function loadConfig($mapOrPath){
-		if(is_string($mapOrPath)){
-			$this->loadConfigFiles($mapOrPath);
-		//-! propably no longer needed becuase of loading through DI
-		//-! probably no longer works
-		}else{
-			$config = $this->processConfigData(Array($mapOrPath));
-			$this->setConfig($config);
-		}
+	public function loadConfig($paths){
+		$this->loadConfigFiles($paths);
 	}
 
 	/*
@@ -195,53 +158,6 @@ class Application extends Base implements ContainerAwareInterface{
 		foreach($paths as $path){
 			$loader = $this->getConfigLoader($path);
 			$loader->load($path);
-		}
-
-		$this->processConfig();
-
-		return $this;
-	}
-
-	//-! propably no longer needed becuase of loading through DI
-	/*
-	Method: processConfigData
-	Process an array of config data to make sure it properly matches configuration.
-	*/
-	public function processConfigData($configData){
-		$processedConfig = $this->getConfigProcessor()->processConfiguration(
-			$this->getConfigSettings()
-			,$configData
-		);
-		return $processedConfig;
-	}
-
-	//-! propably no longer needed becuase of loading through DI
-	//-! probably no longer works
-	/*
-	Method: setConfig
-	Set configuration from an array.  Merges with existing settings unless 'replace' is true.  Make sure config has been processed with {processConfigData()} before passing into this method.
-	Arguments:
-		config(Array): array map of configuration parameters.  See {Configuration} for what configuration parameters there are.
-		replace(Boolean): whether to replace existing config.  If false, will merge with existing config instead.
-	*/
-	protected function setConfig($config, $replace = false){
-		if($replace){
-			$this->config = $config;
-		}else{
-			$this->config = array_merge($this->config, $config);
-		}
-		$consoleConfig = $config;
-		if(isset($consoleConfig['name'])){
-			$this->getContainer()->setParameter('tjm_console.name', $consoleConfig['name']);
-		}
-		if(isset($consoleConfig['version'])){
-			$this->getContainer()->setParameter('tjm_console.version', $consoleConfig['version']);
-		}
-		if(isset($consoleConfig['rootNamespace']) && !isset($this->rootNamespace)){
-			$this->getContainer()->setParameter('tjm_console.rootNamespace', $consoleConfig['rootNamespace']);
-		}
-		if(isset($consoleConfig['commands']) && is_array($consoleConfig['commands'])){
-			$this->getContainer()->setParameter('tjm_console.commands', $consoleConfig['commands']);
 		}
 
 		$this->processConfig();
