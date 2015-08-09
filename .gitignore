@@ -2,3 +2,5 @@
 *.swo
 *.swp
 .DS_Store
+/composer.lock
+/vendor

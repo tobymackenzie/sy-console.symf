@@ -1,0 +1,7 @@
+imports:
+ - {resource: config.php}
+
+tjm_console:
+ name: Test
+ rootNamespace: foo
+ version: '0.1'

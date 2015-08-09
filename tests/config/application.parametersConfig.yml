@@ -1,0 +1,5 @@
+imports:
+ - {resource: config.php}
+
+parameters:
+ test: foo
