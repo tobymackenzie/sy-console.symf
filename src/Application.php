@@ -3,13 +3,12 @@ namespace TJM\Component\Console;
 
 use ReflectionClass;
 use ReflectionObject;
+use SplFileInfo;
 use Symfony\Component\Console\Application as Base;
-use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
-use TJM\Component\Console\DependencyInjection\Configuration;
 use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
@@ -25,6 +24,31 @@ class Application extends Base implements ContainerAwareInterface{
 	/*=====
 	==Commands
 	=====*/
+	/*
+	Method: buildClassNameForPath
+	Runs `buildClassNameForFile()` on file given by path.
+	*/
+	protected function buildClassNameForPath($path, $ns = ''){
+		return $this->buildClassNameForFile(new SplFileInfo($path), $ns);
+
+	}
+
+	/*
+	Method: buildClassNameForFile
+	Given a file containing a PSR class, returns the class name.  Because the class name can't be inferred only from the path, a namespace should be passed in if the class is in a namespace, or it will be assumed to not have one.
+	*/
+	public function buildClassNameForFile(SplFileInfo $file, $ns = ''){
+		$className = $ns;
+		if(method_exists($file, 'getRelativePath') && $relativePath = $file->getRelativePath()){
+			$className .= '\\' . strtr($relativePath, '/', '\\');
+		}
+		if($ns){
+			$className .= '\\';
+		}
+		$className .= $file->getBaseName('.php');
+		return $className;
+	}
+
 	/*
 	Property: rootNamespace
 	Command namespace that is considered root for the application.  If defined, all commands in this namespace will be aliased without their namespace.
@@ -50,11 +74,7 @@ class Application extends Base implements ContainerAwareInterface{
 			$finder->files()->name('*.php')->in($path);
 
 			foreach($finder as $file){
-				$className = $ns;
-				if($relativePath = $file->getRelativePath()){
-					$className .= '\\' . strtr($relativePath, '/', '\\');
-				}
-				$className .= '\\' . $file->getBaseName('.php');
+				$className = $this->buildClassNameForFile($file, $ns);
 				if(!class_exists($className)){
 					require_once($file);
 				}
