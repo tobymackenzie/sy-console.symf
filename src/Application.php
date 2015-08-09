@@ -55,10 +55,17 @@ class Application extends Base implements ContainerAwareInterface{
 					$className .= '\\' . strtr($relativePath, '/', '\\');
 				}
 				$className .= '\\' . $file->getBaseName('.php');
+				if(!class_exists($className)){
+					require_once($file);
+				}
 				$this->addCommandForClassname($className);
 			}
 		}else{
-			$this->addCommandForClassname($ns);
+			$className = $ns;
+			if(!class_exists($className)){
+				require_once($path);
+			}
+			$this->addCommandForClassname($className);
 		}
 
 		return $this;
