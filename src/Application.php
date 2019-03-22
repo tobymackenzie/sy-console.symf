@@ -5,6 +5,9 @@ use ReflectionClass;
 use ReflectionObject;
 use SplFileInfo;
 use Symfony\Component\Console\Application as Base;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -116,6 +119,22 @@ class Application extends Base implements ContainerAwareInterface{
 		return $this;
 	}
 
+	/*
+	Method: getDefaultInputDefinition
+	Like parent, but without shortcuts that we don't want to clobber, eg `-h`, `-n`, `-q`.  Might as well put my own spin on help text.
+	*/
+	protected function getDefaultInputDefinition(){
+		return new InputDefinition(Array(
+			new InputArgument('command', InputArgument::REQUIRED, 'Name of the command to run')
+			,new InputOption('--help', null, InputOption::VALUE_NONE, 'Display command help')
+			,new InputOption('--quiet', null, InputOption::VALUE_NONE, 'Supress all output')
+			,new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase verbosity of output. Use two or three times to increase verbosity')
+			,new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display version of application')
+			,new InputOption('--ansi', null, InputOption::VALUE_NONE, 'Force ANSI output coloring')
+			,new InputOption('--no-ansi', null, InputOption::VALUE_NONE, 'Disable ANSI output coloring')
+			,new InputOption('--no-interactive', null, InputOption::VALUE_NONE, 'Disable interactive input')
+		));
+	}
 
 	/*=====
 	==Config
