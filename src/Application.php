@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\StreamableInputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -31,6 +32,77 @@ class Application extends Base implements ContainerAwareInterface{
 		if($config){
 			$this->loadConfig($config);
 		}
+	}
+	protected function configureIO(InputInterface $input, OutputInterface $output){
+		//--determine decoration
+		if($input->hasParameterOption('--ansi', true)){
+			$output->setDecorated(true);
+		}elseif($input->hasParameterOption('--no-ansi', true)){
+			$output->setDecorated(false);
+		}
+
+		//--determine interactivity
+		if($input->hasParameterOption('--no-interaction', true)){
+			$output->setInteractive(false);
+		}elseif(function_exists('posix_isatty')){
+			if($input instanceof StreamableInputInterface){
+				$inputStream = $input->getStream();
+			}else{
+				$inputStream = null;
+			}
+			//-! remove in 4.0
+			if(!$inputStream && $this->getHelperSet()->has('question')){
+				$inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
+			}
+			if(!@posix_isatty($inputStream) && getenv('SHELL_INTERACTIVE') === false){
+				$input->setInteractive(false);
+			}
+		}
+
+		//--determine verbosity
+		if($input->hasParameterOption('--quiet', true)){
+			$shellVerbosity = -1;
+		}else{
+			if(
+				$input->hasParameterOption('-vvv', true)
+					|| $input->hasParameterOption('--verbose=3', true)
+					|| 3 === $input->getParameterOption('--verbose', false, true)
+			){
+				$shellVerbosity = 3;
+			}elseif($input->hasParameterOption('-vv', true)
+				|| $input->hasParameterOption('--verbose=2', true)
+				|| 2 === $input->getParameterOption('--verbose', false, true)
+			){
+				$shellVerbosity = 2;
+			}elseif($input->hasParameterOption('-v', true)
+				|| $input->hasParameterOption('--verbose=1', true)
+				|| $input->hasParameterOption('--verbose', true)
+				|| $input->getParameterOption('--verbose', false, true)
+			){
+				$shellVerbosity = 1;
+			}
+			if(!isset($shellVerbosity)){
+				$shellVerbosity = (int) getenv('SHELL_VERBOSITY');
+			}
+		}
+		switch($shellVerbosity){
+			case -1:
+				$output->setVerbosity(OutputInterface::VERBOSITY_QUIET);
+				$input->setInteractive(false);
+			break;
+			case 1:
+				$output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
+			break;
+			case 2:
+				$output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+			break;
+			case 3:
+				$output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+			break;
+		}
+		putenv('SHELL_VERBOSITY='.$shellVerbosity);
+		$_ENV['SHELL_VERBOSITY'] = $shellVerbosity;
+		$_SERVER['SHELL_VERBOSITY'] = $shellVerbosity;
 	}
 	public function doRun(InputInterface $input, OutputInterface $output){
 		//--handle global parameters
