@@ -1,17 +1,24 @@
 <?php
 namespace TJM\Component\Console;
 
+use Exception;
 use ReflectionClass;
 use ReflectionObject;
 use SplFileInfo;
 use Symfony\Component\Console\Application as Base;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleErrorEvent;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
@@ -22,6 +29,62 @@ class Application extends Base implements ContainerAwareInterface{
 		if($config){
 			$this->loadConfig($config);
 		}
+	}
+	public function doRun(InputInterface $input, OutputInterface $output){
+		//--handle global parameters
+		if($input->hasParameterOption('--version', true)){
+			$output->writeln($this->getLongVersion());
+			return 0;
+		}
+		$name = $this->getCommandName($input);
+		if($input->hasParameterOption('--help', true)){
+			if(!$name){
+				$name = 'help';
+				$input = new ArrayInput(Array('command_name'=> $this->defaultCommand));
+			}else{
+				$this->wantHelps = true;
+			}
+		}
+
+		if(!$name){
+			$name = $this->defaultCommand;
+			$definition = $this->getDefinition();
+			$definition->setArguments(array_merge(
+				$definition->getArguments()
+				,Array(
+					'command'=> new InputArgument(
+						'command'
+						,InputArgument::OPTIONAL
+						,$definition->getArgument('command')->getDescription()
+						,$name
+					)
+				)
+			));
+		}
+
+		//--run
+		try{
+			$this->runningCommand = null;
+			$command = $this->find($name);
+		}catch(Exception $e){
+		}catch(Throwable $e){
+		}
+		if(isset($e)){
+			if($this->dispatcher !== null){
+				$event = new ConsoleErrorEvent($input, $output, $e);
+				$this->dispatcher->dispatch(ConsoleEvents::ERROR, $event);
+				$e = $event->getError();
+				if($event->getExitCode() === 0){
+					return 0;
+				}
+			}
+			throw $e;
+		}
+		$this->runningCommand = $command;
+		$exitCode = $this->doRunCommand($command, $input, $output);
+		$this->runningCommand = null;
+
+		return $exitCode;
 	}
 
 	/*=====
