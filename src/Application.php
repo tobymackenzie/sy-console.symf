@@ -23,6 +23,8 @@ use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
+	protected $defaultCommand;
+	protected $singleCommand;
 	public function __construct($config = null){
 		parent::__construct();
 
@@ -86,6 +88,18 @@ class Application extends Base implements ContainerAwareInterface{
 
 		return $exitCode;
 	}
+	protected function getCommandName(InputInterface $input){
+		return ($this->singleCommand ? $this->defaultCommand : $input->getFirstArgument());
+	}
+	public function setDefaultCommand($name, $asSingleCommand = false){
+		$this->defaultCommand = $name;
+		if($asSingleCommand){
+			$this->find($commandName);
+			$this->singleCommand = true;
+		}
+		return $this;
+	}
+
 
 	/*=====
 	==Commands
