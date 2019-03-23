@@ -24,11 +24,11 @@ In the config file, you can set parameters, do imports, and configure services j
 ```
 parameters:
  foo: bar
- paths.class: 'FooComponentServicePaths'
+ paths.class: 'Foo\Component\Service\Paths'
  paths.settings:
   foo: '/foo/bar'
   bar: '/bar/foo'
- test.class: 'FooComponentServiceTest'
+ test.class: 'Foo\Component\Service\Test'
 
 services:
  paths:
@@ -42,9 +42,9 @@ tjm_console:
  version: '1.0'
  rootNamespace: foo ## will alias all 'foo:' commands to the same names without the 'foo:'.  This is primarily to make commands easy to access but allow the same commands to be separated by namespace in another app
  commands:
-  'FooComponentCommand': '/Foo/src/Command' ## loads all commands in 'FooComponentCommand' namespace from '/Foo/src/Command' folder
-  'FooComponentOtherOtherCommand': '/Foo/src/Other/OtherCommand.php' ## loads single command class 'FooComponentOtherOtherCommand' from file '/Foo/src/Other/OtherCommand.php'
-  0: 'FooComponentOtherOther2Command' ## loads single command class 'FooComponentOtherOther2Command' via autoloading
+  'Foo\Component\Command': '/Foo/src/Command' ## loads all commands in 'Foo\Component\Command' namespace from '/Foo/src/Command' folder
+  'Foo\Component\Other\OtherCommand': '/Foo/src/Other/OtherCommand.php' ## loads single command class 'Foo\Component\Other\OtherCommand' from file '/Foo/src/Other/OtherCommand.php'
+  0: 'Foo\Component\Other\Other2\Command' ## loads single command class 'Foo\Component\Other\Other2\Command' via autoloading
 ```
 
 The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.  This may be confusing, so I may swap them, but that is how it is currently.
