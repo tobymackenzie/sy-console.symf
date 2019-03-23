@@ -34,7 +34,7 @@ class Application extends Base implements ContainerAwareInterface{
 	}
 	public function doRun(InputInterface $input, OutputInterface $output){
 		//--handle global parameters
-		if($input->hasParameterOption('--version', true)){
+		if($input->hasParameterOption(Array('--version', '-V'), true)){
 			$output->writeln($this->getLongVersion());
 			return 0;
 		}
