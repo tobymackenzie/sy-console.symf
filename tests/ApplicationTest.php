@@ -1,8 +1,9 @@
 <?php
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArgvInput;
 use TJM\Component\Console\Application;
 
-class ApplicationTest extends PHPUnit_Framework_TestCase{
+class ApplicationTest extends TestCase{
 	public function testNoConfig(){
 		$app = new Application();
 		$this->assertEquals('UNKNOWN', $app->getName(), 'name should be set to default.');
