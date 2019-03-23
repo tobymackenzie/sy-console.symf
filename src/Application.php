@@ -24,8 +24,6 @@ use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
-	protected $defaultCommand;
-	protected $singleCommand;
 	public function __construct($config = null){
 		parent::__construct();
 
@@ -33,6 +31,8 @@ class Application extends Base implements ContainerAwareInterface{
 			$this->loadConfig($config);
 		}
 	}
+
+	//--override to remove built in `-n` and `-q` short options
 	protected function configureIO(InputInterface $input, OutputInterface $output){
 		//--determine decoration
 		if($input->hasParameterOption('--ansi', true)){
@@ -104,6 +104,8 @@ class Application extends Base implements ContainerAwareInterface{
 		$_ENV['SHELL_VERBOSITY'] = $shellVerbosity;
 		$_SERVER['SHELL_VERBOSITY'] = $shellVerbosity;
 	}
+
+	//--override this to remove built in `-h` short option
 	public function doRun(InputInterface $input, OutputInterface $output){
 		//--handle global parameters
 		if($input->hasParameterOption(Array('--version', '-V'), true)){
@@ -160,6 +162,10 @@ class Application extends Base implements ContainerAwareInterface{
 
 		return $exitCode;
 	}
+
+	//--override because other overridden commands use these private properties
+	protected $defaultCommand;
+	protected $singleCommand;
 	protected function getCommandName(InputInterface $input){
 		return ($this->singleCommand ? $this->defaultCommand : $input->getFirstArgument());
 	}
