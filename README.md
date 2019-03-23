@@ -13,7 +13,7 @@ Like most Symfony projects these days, you start with [composer](https://getcomp
 <?php
 require __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-use TJMComponentConsoleApplication;
+use TJM\Component\Console\Application;
 
 $app = new Application(__DIR__ . DIRECTORY_SEPARATOR . 'config.yml');
 $app->run();
