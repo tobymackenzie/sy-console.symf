@@ -3,4 +3,5 @@ imports:
 
 services:
  test:
+  public: true
   class: TJM\Tests\Service\Test
