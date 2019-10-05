@@ -47,8 +47,13 @@ class ApplicationTest extends TestCase{
 		$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
 	}
 	public function testLoadCommandsByServices(){
-		$app = new Application(__DIR__ . '/config/application.loadCommandsByServices.yml');
-		$this->assertTrue($app->has('test:echo:test'), 'EchoTestCommand should be loaded.');
-		$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
+		//-! for symfony 3+ only
+		if(class_exists('Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass')){
+			$app = new Application(__DIR__ . '/config/application.loadCommandsByServices.yml');
+			$this->assertTrue($app->has('test:echo:test'), 'EchoTestCommand should be loaded.');
+			$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
+		}else{
+			$this->markTestSkipped("This Symfony version doesn't support loading commands as services in the nice fashion that Symfony 3.3+ do.");
+		}
 	}
 }
