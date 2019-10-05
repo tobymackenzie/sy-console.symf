@@ -1,0 +1,10 @@
+imports:
+ - {resource: config.php}
+
+services:
+ TJM\Tests\Command\:
+   autowire: true
+   resource: '%paths.tests%/Command'
+   tags: ['console.command']
+tjm_console:
+ name: Test

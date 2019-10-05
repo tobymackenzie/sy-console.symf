@@ -46,4 +46,9 @@ class ApplicationTest extends TestCase{
 		$this->assertTrue($app->has('test:echo:test'), 'EchoTestCommand should be loaded.');
 		$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
 	}
+	public function testLoadCommandsByServices(){
+		$app = new Application(__DIR__ . '/config/application.loadCommandsByServices.yml');
+		$this->assertTrue($app->has('test:echo:test'), 'EchoTestCommand should be loaded.');
+		$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
+	}
 }
