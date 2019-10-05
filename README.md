@@ -11,12 +11,9 @@ Like most Symfony projects these days, you start with [composer](https://getcomp
 ``` php
 #!/usr/bin/env php
 <?php
-require __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-
+require __DIR__  . /'vendor/autoload.php';
 use TJM\Component\Console\Application;
-
-$app = new Application(__DIR__ . DIRECTORY_SEPARATOR . 'config.yml');
-$app->run();
+(new Application(__DIR__  . '/config.yml'))->run();
 ```
 
 In the config file, you can set parameters, do imports, and configure services just like you would with a Symfony Standard app (although without a few of the niceties, like bundle path aliases).  There is a 'tjm_console' key for configuring the app itself.  This is where you set the name, version, and commands.
@@ -24,18 +21,16 @@ In the config file, you can set parameters, do imports, and configure services j
 ```
 parameters:
  foo: bar
- paths.class: 'Foo\Component\Service\Paths'
  paths.settings:
   foo: '/foo/bar'
   bar: '/bar/foo'
- test.class: 'Foo\Component\Service\Test'
 
 services:
  paths:
-  class: %paths.class%
+  class: 'Foo\Component\Service\Paths'
   arguments: ['@service_container', %paths.settings%]
  test:
-  class: %test.class%
+  class: 'Foo\Component\Service\Test'
  App\Command\:
   autowire: true
   resource: '%paths.project%/src/Command'
@@ -47,8 +42,7 @@ tjm_console:
  rootNamespace: foo ## will alias all 'foo:' commands to the same names without the 'foo:'.  This is primarily to make commands easy to access but allow the same commands to be separated by namespace in another app
  commands:
   'Foo\Component\Command': '/Foo/src/Command' ## loads all commands in 'Foo\Component\Command' namespace from '/Foo/src/Command' folder
-  'Foo\Component\Other\OtherCommand': '/Foo/src/Other/OtherCommand.php' ## loads single command class 'Foo\Component\Other\OtherCommand' from file '/Foo/src/Other/OtherCommand.php'
-  0: 'Foo\Component\Other\Other2\Command' ## loads single command class 'Foo\Component\Other\Other2\Command' via autoloading
+  - 'Foo\Component\Other\Other2\Command' ## loads single command class 'Foo\Component\Other\Other2\Command' via autoloading
 ```
 
 The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.
