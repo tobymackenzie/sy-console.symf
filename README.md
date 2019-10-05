@@ -6,7 +6,7 @@ Symfony Console component plus dependency injection, config handling, easily con
 Usage
 -----
 
-Like most Symfony projects these days, you start with [composer](https://getcomposer.org/), putting sy-console as a dependency.  You'll create an application similar to [how you would with the symfony component alone](http://symfony.com/doc/current/components/console/introduction.html#creating-a-basic-command), but using the sy-console 'Application' class and passing it configuration as an argument.
+Like most Symfony projects these days, you start with [composer](https://getcomposer.org/), requiring `tjm/sy-console` as a dependency.  You'll create an application similar to [how you would with the symfony component alone](http://symfony.com/doc/current/components/console/introduction.html#creating-a-basic-command), but using the sy-console `Application` class and passing it configuration as an argument.
 
 ``` php
 #!/usr/bin/env php
