@@ -51,8 +51,12 @@ class Application extends Base implements ContainerAwareInterface{
 			}else{
 				$inputStream = null;
 			}
-			//-! remove in 4.0
-			if(!$inputStream && $this->getHelperSet()->has('question')){
+			//-! for symfony < 4
+			if(
+				!$inputStream
+				&& $this->getHelperSet()->has('question')
+				&& method_exists($this->getHelperSet()->get('question'), 'getInputStream')
+			){
 				$inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
 			}
 			if(!@posix_isatty($inputStream) && getenv('SHELL_INTERACTIVE') === false){
