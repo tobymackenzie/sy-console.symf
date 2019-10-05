@@ -53,4 +53,4 @@ tjm_console:
 
 The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.
 
-You can also load classes as services, using the `console.command` tag, as seen in the `services` definition above.
+In Symfony 3+, you can also load classes as services, using the `console.command` tag, as seen in the `services` definition above.
