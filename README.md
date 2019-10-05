@@ -36,6 +36,10 @@ services:
   arguments: ['@service_container', %paths.settings%]
  test:
   class: %test.class%
+ App\Command\:
+  autowire: true
+  resource: '%paths.project%/src/Command'
+  tags: ['console.command']
 
 tjm_console:
  name: Test
@@ -47,7 +51,9 @@ tjm_console:
   0: 'Foo\Component\Other\Other2\Command' ## loads single command class 'Foo\Component\Other\Other2\Command' via autoloading
 ```
 
-The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.  This may be confusing, so I may swap them, but that is how it is currently.
+The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.
+
+You can also load classes as services, using the `console.command` tag, as seen in the `services` definition above.
 
 Future
 ------
