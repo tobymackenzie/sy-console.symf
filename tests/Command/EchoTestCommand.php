@@ -6,6 +6,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TJM\Component\Console\Command\ContainerAwareCommand as Base;
 
 class EchoTestCommand extends Base{
+	static public $defaultName = 'test:echo:test';
 	protected function configure(){
 		$this
 			->setName('test:echo:test')
