@@ -7,6 +7,7 @@ use ReflectionObject;
 use SplFileInfo;
 use Symfony\Component\Console\Application as Base;
 use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
@@ -346,6 +347,7 @@ class Application extends Base implements ContainerAwareInterface{
 	public function processConfig(){
 		$container = $this->getContainer();
 		$container->compile();
+		$this->setCommandLoader($this->container->get('console.command_loader'));
 
 		if($container->hasParameter('tjm_console.name')){
 			$this->setName($container->getParameter('tjm_console.name'));
@@ -378,6 +380,7 @@ class Application extends Base implements ContainerAwareInterface{
 	public function getContainer(){
 		if(!isset($this->container)){
 			$this->container = new ContainerBuilder();
+			$this->container->addCompilerPass(new AddConsoleCommandPass());
 			$this->container->registerExtension(new ConsoleExtension());
 		}
 		return $this->container;
