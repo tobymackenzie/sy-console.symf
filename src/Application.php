@@ -347,7 +347,10 @@ class Application extends Base implements ContainerAwareInterface{
 	public function processConfig(){
 		$container = $this->getContainer();
 		$container->compile();
-		$this->setCommandLoader($this->container->get('console.command_loader'));
+		//-! for symfony 3+ only
+		if(class_exists('Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass')){
+			$this->setCommandLoader($this->container->get('console.command_loader'));
+		}
 
 		if($container->hasParameter('tjm_console.name')){
 			$this->setName($container->getParameter('tjm_console.name'));
@@ -380,7 +383,10 @@ class Application extends Base implements ContainerAwareInterface{
 	public function getContainer(){
 		if(!isset($this->container)){
 			$this->container = new ContainerBuilder();
-			$this->container->addCompilerPass(new AddConsoleCommandPass());
+			//-! for symfony 3+ only
+			if(class_exists('Symfony\Component\Console\DependencyInjection\AddConsoleCommandPass')){
+				$this->container->addCompilerPass(new AddConsoleCommandPass());
+			}
 			$this->container->registerExtension(new ConsoleExtension());
 		}
 		return $this->container;
