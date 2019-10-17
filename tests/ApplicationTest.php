@@ -1,9 +1,23 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\ArrayInput;
 use TJM\Component\Console\Application;
+use TJM\Tests\Command\ThrowErrorCommand;
 
 class ApplicationTest extends TestCase{
+	public function setUp(){
+		require_once(__DIR__ . '/Command/EchoTestCommand.php');
+		require_once(__DIR__ . '/Command/EchoFooCommand.php');
+		require_once(__DIR__ . '/Command/ThrowErrorCommand.php');
+	}
+	public function testErrorInCommand(){
+		$app = new Application(__DIR__ . '/config/application.loadCommandsByServices.yml');
+		$app->setAutoExit(false);
+		$app->setCatchExceptions(false);
+		$this->expectException(Exception::class);
+		$this->expectExceptionMessage(ThrowErrorCommand::EXCEPTION_MESSAGE);
+		$app->run(new ArrayInput(array('command'=> 'test:throw-error')));
+	}
 	public function testNoConfig(){
 		$app = new Application();
 		$this->assertEquals('UNKNOWN', $app->getName(), 'name should be set to default.');
@@ -29,8 +43,6 @@ class ApplicationTest extends TestCase{
 		$this->assertEquals('TJM\Tests\Service\Test', get_class($testService), '"test" service should be of correct class.');
 	}
 	public function testLoadCommandsByClassName(){
-		require_once(__DIR__ . '/Command/EchoTestCommand.php');
-		require_once(__DIR__ . '/Command/EchoFooCommand.php');
 		$app = new Application(__DIR__ . '/config/application.loadCommandsByClassName.yml');
 		$this->assertTrue($app->has('test:echo:test'), 'EchoTestCommand should be loaded.');
 		$this->assertTrue($app->has('test:echo:foo'), 'EchoFooCommand should be loaded.');
