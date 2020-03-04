@@ -11,7 +11,7 @@ class ApplicationTest extends TestCase{
 		require_once(__DIR__ . '/Command/ThrowErrorCommand.php');
 	}
 	public function testErrorInCommand(){
-		$app = new Application(__DIR__ . '/config/application.loadCommandsByServices.yml');
+		$app = new Application(__DIR__ . '/config/application.loadCommandsByDirPath.yml');
 		$app->setAutoExit(false);
 		$app->setCatchExceptions(false);
 		$this->expectException(Exception::class);
