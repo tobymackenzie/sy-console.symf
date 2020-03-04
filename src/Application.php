@@ -19,18 +19,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Throwable;
 use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
+	protected $dispatcher;
 	public function __construct($config = null){
 		parent::__construct();
 
 		if($config){
 			$this->loadConfig($config);
 		}
+	}
+
+	//--override to support use in `doRun`
+	public function setDispatcher(EventDispatcherInterface $dispatcher){
+		$this->dispatcher = $dispatcher;
 	}
 
 	//--override to remove built in `-n` and `-q` short options
