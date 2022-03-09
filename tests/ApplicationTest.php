@@ -5,7 +5,8 @@ use TJM\Component\Console\Application;
 use TJM\Tests\Command\ThrowErrorCommand;
 
 class ApplicationTest extends TestCase{
-	public function setUp(){
+	// public function setUp(){ //-! uncomment for PHP < 7.0
+	public function setUp(): void{
 		require_once(__DIR__ . '/Command/EchoTestCommand.php');
 		require_once(__DIR__ . '/Command/EchoFooCommand.php');
 		require_once(__DIR__ . '/Command/ThrowErrorCommand.php');
