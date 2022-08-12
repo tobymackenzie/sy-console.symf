@@ -9,6 +9,8 @@ class Configuration implements ConfigurationInterface{
 		$treeBuilder = new TreeBuilder();
 		$rootNode = $treeBuilder->root('tjm_console');
 		$rootNode->children()
+			->scalarNode('defaultCommand')
+			->end()
 			->scalarNode('name')
 				->cannotBeOverwritten()
 				->isRequired()
@@ -22,6 +24,9 @@ class Configuration implements ConfigurationInterface{
 			->end()
 			->arrayNode('commands')
 				->prototype('scalar')->end()
+			->end()
+			->booleanNode('singleCommand')
+				->defaultFalse()
 			->end()
 		->end();
 		return $treeBuilder;
