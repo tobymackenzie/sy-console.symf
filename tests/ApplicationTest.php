@@ -1,6 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Tester\ApplicationTester;
 use TJM\Component\Console\Application;
 use TJM\Tests\Command\ThrowErrorCommand;
 
@@ -68,5 +69,40 @@ class ApplicationTest extends TestCase{
 		}else{
 			$this->markTestSkipped("This Symfony version doesn't support loading commands as services in the nice fashion that Symfony 3.3+ do.");
 		}
+	}
+
+	//==default command
+	public function testSimpleDefaultCommand(){
+		$app = new Application(__DIR__ . '/config/application.loadCommandsByFilePath.yml');
+		$app->setAutoExit(false);
+		$app->setDefaultCommand('test:echo:foo');
+		$tester = new ApplicationTester($app);
+		$tester->run(array());
+		$this->assertEquals("foo\n", $tester->getDisplay());
+	}
+	public function testSingleDefaultCommand(){
+		$app = new Application(__DIR__ . '/config/application.single-command.yml');
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array());
+		$this->assertEquals("foo\n", $tester->getDisplay());
+	}
+	public function testSingleDefaultCommandArg(){
+		$app = new Application(__DIR__ . '/config/application.single-command.yml');
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array('write'=> ['a', 'b']));
+		$this->assertEquals("a\nb\n", $tester->getDisplay());
+	}
+	public function testSingleDefaultCommandArgOpt(){
+		$app = new Application(__DIR__ . '/config/application.single-command.yml');
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array(
+			'write'=> ['a', 'b'],
+			'--one'=> 'c',
+			'--two'=> 'd',
+		));
+		$this->assertEquals("a\nb\n1: c\n2: d\n", $tester->getDisplay());
 	}
 }

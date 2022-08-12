@@ -1,0 +1,11 @@
+imports:
+ - {resource: config.php}
+
+tjm_console:
+ commands:
+  0: 'TJM\Tests\Command\EchoWithArgsAndOptsCommand'
+ defaultCommand: 'test:echo:arg-opts'
+ name: Test
+ rootNamespace: foo
+ singleCommand: true
+ version: '0.1'

@@ -363,6 +363,9 @@ class Application extends Base implements ContainerAwareInterface{
 			$this->setCommandLoader($this->container->get('console.command_loader'));
 		}
 
+		if($container->hasParameter('tjm_console.defaultCommand')){
+			$this->setDefaultCommand($container->getParameter('tjm_console.defaultCommand'));
+		}
 		if($container->hasParameter('tjm_console.name')){
 			$this->setName($container->getParameter('tjm_console.name'));
 		}
@@ -371,6 +374,9 @@ class Application extends Base implements ContainerAwareInterface{
 		}
 		if($container->hasParameter('tjm_console.rootNamespace')){
 			$this->rootNamespace = $container->getParameter('tjm_console.rootNamespace');
+		}
+		if($container->hasParameter('tjm_console.singleCommand')){
+			$this->singleCommand = $container->getParameter('tjm_console.singleCommand');
 		}
 		if($container->hasParameter('tjm_console.commands')){
 			foreach($container->getParameter('tjm_console.commands') as $key=> $value){
