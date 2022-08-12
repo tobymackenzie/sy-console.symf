@@ -1,6 +1,8 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\ApplicationTester;
 use TJM\Component\Console\Application;
 use TJM\Tests\Command\ThrowErrorCommand;
@@ -10,6 +12,7 @@ class ApplicationTest extends TestCase{
 	public function setUp(): void{
 		require_once(__DIR__ . '/Command/EchoTestCommand.php');
 		require_once(__DIR__ . '/Command/EchoFooCommand.php');
+		require_once(__DIR__ . '/Command/EchoWithArgsAndOptsCommand.php');
 		require_once(__DIR__ . '/Command/ThrowErrorCommand.php');
 	}
 	public function testErrorInCommand(){
@@ -97,12 +100,8 @@ class ApplicationTest extends TestCase{
 	public function testSingleDefaultCommandArgOpt(){
 		$app = new Application(__DIR__ . '/config/application.single-command.yml');
 		$app->setAutoExit(false);
-		$tester = new ApplicationTester($app);
-		$tester->run(array(
-			'write'=> ['a', 'b'],
-			'--one'=> 'c',
-			'--two'=> 'd',
-		));
-		$this->assertEquals("a\nb\n1: c\n2: d\n", $tester->getDisplay());
+		$output = new BufferedOutput();
+		$app->run(new StringInput('--one c --two d a b'), $output);
+		$this->assertEquals("a\nb\n1: c\n2: d\n", $output->fetch());
 	}
 }

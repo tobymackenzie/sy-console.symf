@@ -133,23 +133,9 @@ class Application extends Base implements ContainerAwareInterface{
 				$this->wantHelps = true;
 			}
 		}
-
 		if(!$name){
 			$name = $this->defaultCommand;
-			$definition = $this->getDefinition();
-			$definition->setArguments(array_merge(
-				$definition->getArguments()
-				,Array(
-					'command'=> new InputArgument(
-						'command'
-						,InputArgument::OPTIONAL
-						,$definition->getArgument('command')->getDescription()
-						,$name
-					)
-				)
-			));
 		}
-
 		//--run
 		try{
 			$this->runningCommand = null;
@@ -178,8 +164,11 @@ class Application extends Base implements ContainerAwareInterface{
 	//--override because other overridden commands use these private properties
 	protected $defaultCommand;
 	protected $singleCommand;
+	public function isSingleCommand(): bool{
+		return $this->singleCommand;
+	}
 	protected function getCommandName(InputInterface $input){
-		return ($this->singleCommand ? $this->defaultCommand : $input->getFirstArgument());
+		return ($this->isSingleCommand() ? $this->defaultCommand : $input->getFirstArgument());
 	}
 	public function setDefaultCommand($name, $asSingleCommand = false){
 		$this->defaultCommand = $name;
@@ -291,16 +280,19 @@ class Application extends Base implements ContainerAwareInterface{
 	Like parent, but without shortcuts that we don't want to clobber, eg `-h`, `-n`, `-q`.  Might as well put my own spin on help text.
 	*/
 	protected function getDefaultInputDefinition(){
-		return new InputDefinition(Array(
-			new InputArgument('command', InputArgument::REQUIRED, 'Name of the command to run')
-			,new InputOption('--ansi', null, InputOption::VALUE_NONE, 'Force ANSI output coloring')
-			,new InputOption('--no-ansi', null, InputOption::VALUE_NONE, 'Disable ANSI output coloring')
-			,new InputOption('--help', null, InputOption::VALUE_NONE, 'Display command help')
-			,new InputOption('--no-interactive', null, InputOption::VALUE_NONE, 'Disable interactive input')
-			,new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase verbosity of output. Use two or three times to increase verbosity')
-			,new InputOption('--quiet', null, InputOption::VALUE_NONE, 'Supress all output')
-			,new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display version of application')
-		));
+		$opts = Array(
+			new InputOption('--ansi', null, InputOption::VALUE_NONE, 'Force ANSI output coloring'),
+			new InputOption('--no-ansi', null, InputOption::VALUE_NONE, 'Disable ANSI output coloring'),
+			new InputOption('--help', null, InputOption::VALUE_NONE, 'Display command help'),
+			new InputOption('--no-interactive', null, InputOption::VALUE_NONE, 'Disable interactive input'),
+			new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase verbosity of output. Use two or three times to increase verbosity'),
+			new InputOption('--quiet', null, InputOption::VALUE_NONE, 'Supress all output'),
+			new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display version of application'),
+		);
+		if(!$this->isSingleCommand()){
+			array_unshift($opts, new InputArgument('command', InputArgument::REQUIRED, 'Name of the command to run'));
+		}
+		return new InputDefinition($opts);
 	}
 
 	/*=====
