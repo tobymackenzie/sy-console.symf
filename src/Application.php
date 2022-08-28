@@ -284,7 +284,7 @@ class Application extends Base implements ContainerAwareInterface{
 			new InputOption('--ansi', null, InputOption::VALUE_NONE, 'Force ANSI output coloring'),
 			new InputOption('--no-ansi', null, InputOption::VALUE_NONE, 'Disable ANSI output coloring'),
 			new InputOption('--help', null, InputOption::VALUE_NONE, 'Display command help'),
-			new InputOption('--no-interactive', null, InputOption::VALUE_NONE, 'Disable interactive input'),
+			new InputOption('--no-interaction', null, InputOption::VALUE_NONE, 'Disable interactive input'),
 			new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase verbosity of output. Use two or three times to increase verbosity'),
 			new InputOption('--quiet', null, InputOption::VALUE_NONE, 'Supress all output'),
 			new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display version of application'),
