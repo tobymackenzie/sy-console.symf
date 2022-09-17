@@ -30,7 +30,25 @@ class Application extends Base implements ContainerAwareInterface{
 	public function __construct($config = null){
 		parent::__construct();
 
-		if($config){
+		if(is_array($config)){
+			foreach($config as $key=> $value){
+				switch($key){
+					case 'commands':
+						foreach($value as $commandKey=> $commandValue){
+							$this->add($commandValue);
+						}
+					break;
+					default:
+						$setter = 'set' . ucfirst($key);
+						if(method_exists($this, $setter)){
+							$this->$setter($value);
+						}else{
+							$this->$key = $value;
+						}
+					break;
+				}
+			}
+		}elseif($config){
 			$this->loadConfig($config);
 		}
 	}

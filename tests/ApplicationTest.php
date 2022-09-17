@@ -35,6 +35,20 @@ class ApplicationTest extends TestCase{
 		$this->assertEquals('0.1', $app->getVersion(), 'version should be set from configuration.');
 		$this->assertEquals('foo', $app->getRootNamespace(), 'rootNamespace should be set from configuration.');
 	}
+	public function testArrayConfig(){
+		$app = new Application(array(
+			'commands'=> array(
+				new ThrowErrorCommand(),
+			),
+			'rootNamespace'=> 'foo',
+			'name'=> 'Test',
+			'version'=> '0.1',
+		));
+		$this->assertEquals('Test', $app->getName(), 'name should be set from configuration.');
+		$this->assertEquals('0.1', $app->getVersion(), 'version should be set from configuration.');
+		$this->assertEquals('foo', $app->getRootNamespace(), 'rootNamespace should be set from configuration.');
+		$this->assertTrue($app->has('test:throw-error'), 'command should be added.');
+	}
 	public function testParametersConfig(){
 		$app = new Application(__DIR__ . '/config/application.parametersConfig.yml');
 		$this->assertEquals(realpath(__DIR__), realpath($app->getContainer()->getParameter('paths.tests')), '"paths.tests" parameter should be set from config.');
