@@ -1,7 +1,7 @@
 sy-console
 ==========
 
-Symfony Console component plus dependency injection, config handling, easily configured loading of commands, and other niceties.
+Symfony Console component plus dependency injection, config handling, easily configured loading of commands, STDIN as first argument, improvements to default command behavior, and other niceties.
 
 Usage
 -----
