@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StreamableInputInterface;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -27,6 +28,7 @@ use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
 	protected $dispatcher;
+	protected $stdin;
 	public function __construct($config = null){
 		parent::__construct();
 
@@ -50,6 +52,14 @@ class Application extends Base implements ContainerAwareInterface{
 			}
 		}elseif($config){
 			$this->loadConfig($config);
+		}
+		//-# `if` for unit testing
+		if(empty($this->stdin)){
+			$this->stdin = STDIN;
+		}
+		if(is_resource($this->stdin)){
+			stream_set_blocking($this->stdin, 0);
+			$this->stdin = stream_get_contents($this->stdin);
 		}
 	}
 
@@ -152,15 +162,40 @@ class Application extends Base implements ContainerAwareInterface{
 			}
 		}
 		if(!$name){
+			$isDefault = true;
 			$name = $this->defaultCommand;
+		}else{
+			$isDefault = false;
 		}
-		//--run
+
+		//--get command
 		try{
 			$this->runningCommand = null;
 			$command = $this->find($name);
 		}catch(Exception $e){
 		}catch(Throwable $e){
 		}
+
+		//--add stdin
+		if($this->stdin){
+			$stream = $input instanceof StreamableInputInterface ? $input->getStream() : null;
+			$input = (string) $input;
+			if($isDefault || $this->isSingleCommand()){
+				if($isDefault && !$input){
+					$input = $name . ' ' . escapeshellarg($this->stdin);
+				}else{
+					$input = escapeshellarg($this->stdin) . ' ' . $input;
+				}
+			}else{
+				$input = preg_replace('/^([^ ]+)/', '$1 ' . escapeshellarg($this->stdin), $input);
+			}
+			$input = new StringInput($input);
+			if($stream){
+				$input->setStream($stream);
+			}
+		}
+
+		//--run
 		if(isset($e)){
 			if($this->dispatcher !== null){
 				$event = new ConsoleErrorEvent($input, $output, $e);
@@ -181,7 +216,7 @@ class Application extends Base implements ContainerAwareInterface{
 
 	//--override because other overridden commands use these private properties
 	protected $defaultCommand;
-	protected $singleCommand;
+	protected $singleCommand = false;
 	public function isSingleCommand(): bool{
 		return $this->singleCommand;
 	}

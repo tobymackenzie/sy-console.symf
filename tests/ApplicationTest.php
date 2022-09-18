@@ -5,6 +5,7 @@ use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\ApplicationTester;
 use TJM\Component\Console\Application;
+use TJM\Tests\Command\EchoWithArgsAndOptsCommand;
 use TJM\Tests\Command\ThrowErrorCommand;
 
 class ApplicationTest extends TestCase{
@@ -117,5 +118,74 @@ class ApplicationTest extends TestCase{
 		$output = new BufferedOutput();
 		$app->run(new StringInput('--one c --two d a b'), $output);
 		$this->assertEquals("a\nb\n1: c\n2: d\n", $output->fetch());
+	}
+
+	//==stdin
+	public function testStdinString(){
+		$app = new Application(array(
+			'commands'=> array(
+				new EchoWithArgsAndOptsCommand(),
+			),
+			//--fake stdin
+			'stdin'=> 'foo bar',
+		));
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array('test:echo:arg-opts'));
+		$this->assertEquals("foo bar\n", $tester->getDisplay());
+	}
+	public function testStdinPipe(){
+		//--fake stdin
+		$stream = fopen('php://memory', 'r+');
+		fwrite($stream, "foo bar b");
+		rewind($stream);
+
+		$app = new Application(array(
+			'commands'=> array(
+				new EchoWithArgsAndOptsCommand(),
+			),
+			'stdin'=> $stream,
+		));
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array('test:echo:arg-opts'));
+		$this->assertEquals("foo bar b\n", $tester->getDisplay());
+	}
+	public function testStdinDefaultSingleCommand(){
+		//--fake stdin
+		$stream = fopen('php://memory', 'r+');
+		fwrite($stream, "foo bar c");
+		rewind($stream);
+
+		$app = new Application(array(
+			'commands'=> array(
+				new EchoWithArgsAndOptsCommand(),
+			),
+			'defaultCommand'=> 'test:echo:arg-opts',
+			'singleCommand'=> true,
+			'stdin'=> $stream,
+		));
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array());
+		$this->assertEquals("foo bar c\n", $tester->getDisplay());
+	}
+	public function testStdinDefaultCommand(){
+		//--fake stdin
+		$stream = fopen('php://memory', 'r+');
+		fwrite($stream, "foo bar d");
+		rewind($stream);
+
+		$app = new Application(array(
+			'commands'=> array(
+				new EchoWithArgsAndOptsCommand(),
+			),
+			'defaultCommand'=> 'test:echo:arg-opts',
+			'stdin'=> $stream,
+		));
+		$app->setAutoExit(false);
+		$tester = new ApplicationTester($app);
+		$tester->run(array());
+		$this->assertEquals("foo bar d\n", $tester->getDisplay());
 	}
 }
