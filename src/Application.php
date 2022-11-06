@@ -58,8 +58,10 @@ class Application extends Base implements ContainerAwareInterface{
 			$this->stdin = STDIN;
 		}
 		if(is_resource($this->stdin)){
-			stream_set_blocking($this->stdin, 0);
+			$stdin = $this->stdin;
+			stream_set_blocking($stdin, 0);
 			$this->stdin = stream_get_contents($this->stdin);
+			stream_set_blocking($stdin, 1);
 		}
 	}
 
