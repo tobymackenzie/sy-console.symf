@@ -15,5 +15,6 @@ class EchoFooCommand extends Base{
 	}
 	protected function execute(InputInterface $input, OutputInterface $output){
 		$output->writeln('foo');
+		return 0;
 	}
 }

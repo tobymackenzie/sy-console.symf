@@ -15,5 +15,6 @@ class EchoTestCommand extends Base{
 	}
 	protected function execute(InputInterface $input, OutputInterface $output){
 		$output->writeln('test');
+		return 0;
 	}
 }

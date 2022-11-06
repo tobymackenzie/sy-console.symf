@@ -26,5 +26,6 @@ class EchoWithArgsAndOptsCommand extends Base{
 			$write .= "\n2: {$input->getOption('two')}";
 		}
 		$output->writeln($write);
+		return 0;
 	}
 }
