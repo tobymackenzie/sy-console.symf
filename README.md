@@ -48,3 +48,8 @@ tjm_console:
 The commands key is an associative array, with the key being the namespace and the value being the folder or file path.  If the key is numeric, then the value will be the namespaced class name of the command, and it will use the autoloader to load the class.
 
 In Symfony 3+, you can also load classes as services, using the `console.command` tag, as seen in the `services` definition above.
+
+Known Issues
+-------
+
+When piping into a command, eg `echo 'foo' | bin/console something`, the Symfony question helper will act as if interactive is set to false, and thus will skip asking users for input, just using the default.  This seems to be an issue with STDIN and PHP in general.  I'm looking for a solution, but haven't found one yet.  Since piping into the standard Symfony console doesn't even work, you may not notice.
