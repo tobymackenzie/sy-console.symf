@@ -28,6 +28,7 @@ use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
 
 class Application extends Base implements ContainerAwareInterface{
 	protected $dispatcher;
+	protected $runningCommand;
 	protected $stdin;
 	public function __construct($config = null){
 		parent::__construct();
