@@ -6,8 +6,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface{
 	public function getConfigTreeBuilder(){
-		$treeBuilder = new TreeBuilder();
-		$rootNode = $treeBuilder->root('tjm_console');
+		$treeBuilder = new TreeBuilder('tjm_console');
+		$rootNode = $treeBuilder->getRootNode();
 		$rootNode->children()
 			->scalarNode('defaultCommand')
 			->end()

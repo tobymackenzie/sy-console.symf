@@ -20,8 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use TJM\Component\Console\DependencyInjection\ConsoleExtension;
 use TJM\Component\DependencyInjection\Loader\MultiPathLoader;
@@ -67,7 +67,7 @@ class Application extends Base implements ContainerAwareInterface{
 	}
 
 	//--override to support use in `doRun`
-	public function setDispatcher(EventDispatcherInterface $dispatcher){
+	public function setDispatcher(EventDispatcherInterface $dispatcher): void{
 		$this->dispatcher = $dispatcher;
 	}
 
@@ -223,10 +223,10 @@ class Application extends Base implements ContainerAwareInterface{
 	public function isSingleCommand(): bool{
 		return $this->singleCommand;
 	}
-	protected function getCommandName(InputInterface $input){
+	protected function getCommandName(InputInterface $input): ?string{
 		return ($this->isSingleCommand() ? $this->defaultCommand : $input->getFirstArgument());
 	}
-	public function setDefaultCommand($name, $asSingleCommand = false){
+	public function setDefaultCommand($name, $asSingleCommand = false): static{
 		$this->defaultCommand = $name;
 		if($asSingleCommand){
 			$this->find($commandName);
@@ -335,7 +335,7 @@ class Application extends Base implements ContainerAwareInterface{
 	Method: getDefaultInputDefinition
 	Like parent, but without shortcuts that we don't want to clobber, eg `-h`, `-n`, `-q`.  Might as well put my own spin on help text.
 	*/
-	protected function getDefaultInputDefinition(){
+	protected function getDefaultInputDefinition(): InputDefinition{
 		$opts = Array(
 			new InputOption('--ansi', null, InputOption::VALUE_NONE, 'Force ANSI output coloring'),
 			new InputOption('--no-ansi', null, InputOption::VALUE_NONE, 'Disable ANSI output coloring'),
