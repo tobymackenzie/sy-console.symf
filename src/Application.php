@@ -82,7 +82,7 @@ class Application extends Base implements ContainerAwareInterface{
 
 		//--determine interactivity
 		if($input->hasParameterOption('--no-interaction', true)){
-			$output->setInteractive(false);
+			$input->setInteractive(false);
 		}elseif(function_exists('posix_isatty')){
 			if($input instanceof StreamableInputInterface){
 				$inputStream = $input->getStream();
