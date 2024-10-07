@@ -4,4 +4,4 @@ imports:
 services:
  test:
   public: true
-  class: TJM\Tests\Service\Test
+  class: TJM\Console\Tests\Service\Tst

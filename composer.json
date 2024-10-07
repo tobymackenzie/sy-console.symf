@@ -28,4 +28,9 @@
 			"TJM\\Component\\Console\\" : "src"
 		}
 	}
+	,"autoload-dev": {
+		"psr-4": {
+			"TJM\\Console\\Tests\\": "tests"
+		}
+	}
 }

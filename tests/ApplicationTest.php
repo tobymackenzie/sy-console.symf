@@ -60,7 +60,7 @@ class ApplicationTest extends TestCase{
 		$this->assertTrue($app->getContainer()->has('test'), 'App container should have a "test" service.');
 		$testService = $app->getContainer()->get('test');
 		$this->assertTrue(is_object($testService), '"test" service should be an object.');
-		$this->assertEquals('TJM\Tests\Service\Test', get_class($testService), '"test" service should be of correct class.');
+		$this->assertEquals('TJM\Console\Tests\Service\Tst', get_class($testService), '"test" service should be of correct class.');
 	}
 	public function testLoadCommandsByClassName(){
 		$app = new Application(__DIR__ . '/config/application.loadCommandsByClassName.yml');
