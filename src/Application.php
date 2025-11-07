@@ -456,7 +456,7 @@ class Application extends Base implements ContainerAwareInterface{
 		}
 		return $this->container;
 	}
-	public function setContainer(ContainerInterface $container = null){
+	public function setContainer(?ContainerInterface $container = null){
 		$this->container = $container;
 		return $this;
 	}

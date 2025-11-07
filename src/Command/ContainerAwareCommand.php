@@ -22,7 +22,7 @@ abstract class ContainerAwareCommand extends Command implements ContainerAwareIn
 		}
 		return $this->container;
 	}
-	public function setContainer(ContainerInterface $container = null){
+	public function setContainer(?ContainerInterface $container = null){
 		$this->container = $container;
 		return $this;
 	}
