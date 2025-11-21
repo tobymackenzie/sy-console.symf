@@ -218,7 +218,7 @@ class Application extends Base implements ContainerAwareInterface{
 	}
 
 	//--override because other overridden commands use these private properties
-	protected $defaultCommand;
+	protected $defaultCommand = 'list';
 	protected $singleCommand = false;
 	public function isSingleCommand(): bool{
 		return $this->singleCommand;
